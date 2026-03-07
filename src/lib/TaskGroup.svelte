@@ -22,6 +22,7 @@
   let isMenuOpen: boolean = $state(false)
   let isColorPickerOpen: boolean = $state(false)
   let currentTheme: Theme = $state(getTheme())
+  let menuContainerRef: HTMLDivElement | undefined = $state()
 
   // Subscribe to theme changes to re-render colors
   $effect(() => {
@@ -36,8 +37,7 @@
     if (!isMenuOpen) return
 
     function handleClickOutside(event: MouseEvent) {
-      const menuContainer = document.querySelector('.menu-container')
-      if (menuContainer && !menuContainer.contains(event.target as Node)) {
+      if (menuContainerRef && !menuContainerRef.contains(event.target as Node)) {
         isMenuOpen = false
       }
     }
@@ -199,33 +199,33 @@
       <span class="group-title" onclick={handleEditTitle} title="Click to edit">
         {group.title}
       </span>
-      <div class="menu-container">
+      <div class="menu-container" bind:this={menuContainerRef}>
         <button onclick={handleMenuClick} class="menu-btn" title="Menu">
           ⋯
         </button>
         {#if isMenuOpen}
-          <div class="menu-dropdown">
+          <div class="menu-dropdown" onclick={(e) => e.stopPropagation()}>
              {#if isColorPickerOpen}
-               <div class="color-picker">
-                 {#each colorThemeOptions as colorTheme (colorTheme)}
-                   {@const colors = getColorForTheme(colorTheme, currentTheme)}
-                   <button
-                     onclick={() => handleChangeColor(colorTheme)}
-                     class="color-square"
-                     style="background-color: {colors.bg}; border-color: {colors.text};"
-                     title="Choose color"
-                   />
-                 {/each}
-               </div>
-            {:else}
-              <button onclick={() => (isColorPickerOpen = true)} class="menu-item">
-                Change Color
-              </button>
-              <button onclick={handleDeleteFromMenu} class="menu-item delete-item">
-                Delete Group
-              </button>
-            {/if}
-          </div>
+                <div class="color-picker">
+                  {#each colorThemeOptions as colorTheme (colorTheme)}
+                    {@const colors = getColorForTheme(colorTheme, currentTheme)}
+                    <button
+                      onclick={() => handleChangeColor(colorTheme)}
+                      class="color-square"
+                      style="background-color: {colors.bg}; border-color: {colors.text};"
+                      title="Choose color"
+                    />
+                  {/each}
+                </div>
+             {:else}
+               <button onclick={() => (isColorPickerOpen = true)} class="menu-item">
+                 Change Color
+               </button>
+               <button onclick={handleDeleteFromMenu} class="menu-item delete-item">
+                 Delete Group
+               </button>
+             {/if}
+           </div>
         {/if}
       </div>
     {/if}
