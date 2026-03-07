@@ -254,15 +254,5 @@
     background-color: var(--bg-tertiary);
   }
 
-  .btn-primary {
-    border-color: var(--accent-color);
-  }
 
-  .btn-secondary {
-    border-color: var(--border-color);
-  }
-
-  .btn-danger {
-    border-color: var(--error-text);
-  }
 </style>

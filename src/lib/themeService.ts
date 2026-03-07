@@ -1,7 +1,7 @@
 export type Theme = 'light' | 'dark'
 
 let currentTheme: Theme =
-  (typeof localStorage !== 'undefined' && (localStorage.getItem('theme') as Theme)) || 'light'
+  (typeof localStorage !== 'undefined' && (localStorage.getItem('theme') as Theme)) || 'dark'
 let themeCallbacks: ((theme: Theme) => void)[] = []
 
 export function subscribeToThemeChanges(callback: (theme: Theme) => void): () => void {

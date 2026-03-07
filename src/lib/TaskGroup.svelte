@@ -31,6 +31,21 @@
     return () => unsubscribe()
   })
 
+  // Close menu when clicking outside
+  $effect(() => {
+    if (!isMenuOpen) return
+
+    function handleClickOutside(event: MouseEvent) {
+      const menuContainer = document.querySelector('.menu-container')
+      if (menuContainer && !menuContainer.contains(event.target as Node)) {
+        isMenuOpen = false
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  })
+
   const colorThemeOptions: ColorTheme[] = ['white', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink']
 
   // Get current colors based on theme
@@ -181,9 +196,9 @@
         </button>
       </div>
     {:else}
-      <h3 class="group-title" ondblclick={handleEditTitle} title="Double-click to edit">
+      <span class="group-title" onclick={handleEditTitle} title="Click to edit">
         {group.title}
-      </h3>
+      </span>
       <div class="menu-container">
         <button onclick={handleMenuClick} class="menu-btn" title="Menu">
           ⋯
@@ -268,12 +283,12 @@
   }
 
   .group-title {
-    margin: 0;
+    display: inline-block;
     font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    flex: 1;
     user-select: none;
-    inherit: color;
+    color: inherit;
   }
 
   .group-title:hover {

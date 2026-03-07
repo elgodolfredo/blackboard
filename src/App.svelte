@@ -13,6 +13,7 @@
   let currentUser: User | null = $state(null)
   let routeState: RouteState = $state({ page: 'login' })
   let boardState: AppState = $state({ groups: [] })
+  let currentBoard: any = $state(null)
   let unsubscribeBoard: (() => void) | null = $state(null)
   let routerInitialized = false
 
@@ -29,6 +30,7 @@
 
         unsubscribeBoard = subscribeToBoardUpdates(state.boardId, (board) => {
           if (board) {
+            currentBoard = board
             boardState = board.appState
           }
         })
@@ -111,14 +113,18 @@
     onSelectBoard={handleSelectBoard}
     onLogout={handleLogout}
   />
-{:else if routeState.page === 'board' && currentUser}
-  <div class="board-container">
-    <div class="board-header">
-      <div class="board-header-spacer"></div>
-      <AppMenu onBackToBoards={handleBackToDashboard} onLogout={handleLogout} />
-    </div>
-    <TaskBoard appState={boardState} onUpdateState={handleUpdateBoardState} />
-  </div>
+  {:else if routeState.page === 'board' && currentUser}
+   <div class="board-container">
+     <div class="board-header">
+       <AppMenu 
+         boardTitle={currentBoard?.title || 'Board'} 
+         boardId={routeState.boardId}
+         onBackToBoards={handleBackToDashboard} 
+         onLogout={handleLogout} 
+       />
+     </div>
+     <TaskBoard appState={boardState} onUpdateState={handleUpdateBoardState} />
+   </div>
 {/if}
 
 <style>
@@ -140,15 +146,11 @@
 
   .board-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     padding: 1rem;
     background-color: var(--bg-secondary);
     border-bottom: 3px solid var(--border-color);
     z-index: 10;
-  }
-
-  .board-header-spacer {
-    flex: 1;
   }
 </style>
