@@ -4,7 +4,7 @@
   import { formatDate } from './dateUtils'
   import { toggleTheme, getTheme, subscribeToThemeChanges } from './themeService'
   import type { User } from 'firebase/auth'
-  import type { Board } from './firestoreService'
+  import type { Board } from './types'
   import type { Theme } from './themeService'
 
   interface Props {

@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   type User,
 } from 'firebase/auth'
+import { upsertUserProfile } from './firestoreService'
 
 export interface AuthState {
   user: User | null
@@ -16,7 +17,17 @@ export interface AuthState {
 export async function loginWithGoogle(): Promise<void> {
   try {
     const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
+    const result = await signInWithPopup(auth, provider)
+    
+    // Create/update user profile after successful login
+    if (result.user) {
+      await upsertUserProfile({
+        uid: result.user.uid,
+        email: result.user.email || '',
+        displayName: result.user.displayName,
+        photoURL: result.user.photoURL,
+      })
+    }
   } catch (error: unknown) {
     const err = error as { code: string; message: string }
     throw new Error(getErrorMessage(err.code))

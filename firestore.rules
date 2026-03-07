@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isBoardOwner(bid) {
+      return isAuthenticated() && request.auth.uid == get(/databases/{database}/documents/boards/{bid}).data.userId;
+    }
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      // Users can only read their own profile
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can only create/update their own profile
+      allow write: if isAuthenticated() && request.auth.uid == userId && isValidUserProfile();
+      
+      // Validation function for user profile
+      function isValidUserProfile() {
+        let incoming = request.resource.data;
+        let existing = resource.data;
+        return incoming.uid == request.auth.uid &&
+               incoming.email is string &&
+               incoming.email.size() > 0 &&
+               incoming.displayName is string &&
+               incoming.displayName.size() > 0 &&
+               incoming.displayName.size() <= 255 &&
+               (incoming.photoURL == null || incoming.photoURL is string) &&
+               incoming.createdAt is number &&
+               incoming.updatedAt is number &&
+               incoming.updatedAt > existing.updatedAt;
+      }
+    }
+
+    // BOARDS COLLECTION
+    match /boards/{boardId} {
+      // Read: owner, collaborators, or public boards
+      allow read: if isAuthenticated() && 
+                     (isBoardOwner(boardId) || 
+                      get(/databases/{database}/documents/boards/{boardId}).data.visibility == 'public' ||
+                      request.auth.uid in get(/databases/{database}/documents/boards/{boardId}).data.get('collaborators', []));
+      
+      // Create: authenticated users can create boards
+      allow create: if isAuthenticated() && isValidBoardCreation();
+      
+      // Update: only owner or collaborators with correct role
+      allow update: if isAuthenticated() && isValidBoardUpdate();
+      
+      // Delete: not allowed (soft delete via archived flag)
+      allow delete: if false;
+
+      function isValidBoardCreation() {
+        let data = request.resource.data;
+        return data.userId == request.auth.uid &&
+               data.title is string &&
+               data.title.size() > 0 &&
+               data.title.size() <= 500 &&
+               data.createdAt is number &&
+               data.updatedAt is number &&
+               data.appState is map &&
+               data.appState.groups is list &&
+               data.visibility == 'private' &&
+               data.collaborators is list &&
+               data.collaborators.size() == 0 &&
+               data.archived == false;
+      }
+
+      function isValidBoardUpdate() {
+        let newData = request.resource.data;
+        let oldData = resource.data;
+        let uid = request.auth.uid;
+        let isOwner = uid == oldData.userId;
+        let isCollaborator = uid in oldData.collaborators;
+        
+        return (isOwner || isCollaborator) &&
+               newData.userId == oldData.userId &&
+               newData.createdAt == oldData.createdAt &&
+               newData.title is string &&
+               newData.title.size() > 0 &&
+               newData.title.size() <= 500 &&
+               newData.updatedAt is number &&
+               newData.updatedAt > oldData.updatedAt &&
+               newData.appState is map &&
+               newData.appState.groups is list &&
+               newData.visibility in ['private', 'public', 'collaborative'] &&
+               newData.collaborators is list &&
+               newData.collaborators.size() <= 100 &&
+               newData.archived is bool &&
+               // Only owner can change visibility, collaborators, or archived
+               (
+                 isOwner || 
+                 (
+                   newData.visibility == oldData.visibility &&
+                   newData.collaborators == oldData.collaborators &&
+                   newData.archived == oldData.archived
+                 )
+               );
+      }
+    }
+
+    // Catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
