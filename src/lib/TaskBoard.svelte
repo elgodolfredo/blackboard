@@ -115,13 +115,7 @@
 >
   {#if appState.groups.length === 0}
     <div class="empty-state">
-      Right-click anywhere or use the button below to create a group
-      <button onclick={(e) => {
-        e.stopPropagation()
-        handleAddGroup()
-      }}>
-        + Add Group
-      </button>
+      Right-click anywhere to create a group
     </div>
   {/if}
 
@@ -179,19 +173,6 @@
     font-size: 1.1rem;
   }
 
-  .empty-state button {
-    padding: 0.75rem 1.5rem;
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 2px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  .empty-state button:hover {
-    background-color: var(--bg-tertiary);
-  }
 
   .group-wrapper.dragging {
     z-index: 1000;

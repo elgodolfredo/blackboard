@@ -179,7 +179,7 @@
     border: none;
     background-color: transparent;
     font-family: inherit;
-    font-weight: inherit;
+    font-weight: bold;
     text-align: left;
   }
 

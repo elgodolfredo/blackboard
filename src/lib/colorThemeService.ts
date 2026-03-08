@@ -9,35 +9,35 @@ export interface ColorConfig {
 export const colorThemes: Record<ColorTheme, ColorConfig> = {
   white: {
     light: { bg: '#ffffff', text: '#333333' },
-    dark: { bg: '#404040', text: '#ffffff' },
+    dark: { bg: '#4a4a4a', text: '#e8e8e8' },
   },
   red: {
     light: { bg: '#ffe0e0', text: '#333333' },
-    dark: { bg: '#5c2a2a', text: '#ff9999' },
+    dark: { bg: '#7a3535', text: '#f4b8b8' },
   },
   orange: {
     light: { bg: '#ffe8cc', text: '#333333' },
-    dark: { bg: '#5c3d1a', text: '#ffb366' },
+    dark: { bg: '#b7410a', text: '#ffb366' },
   },
   yellow: {
     light: { bg: '#fffacc', text: '#333333' },
-    dark: { bg: '#5c5a1a', text: '#ffff99' },
+    dark: { bg: '#7a7828', text: '#f4f49e' },
   },
   green: {
     light: { bg: '#e0f0e0', text: '#333333' },
-    dark: { bg: '#1a5c1a', text: '#99ff99' },
+    dark: { bg: '#2a7a2a', text: '#a8f4a8' },
   },
   blue: {
     light: { bg: '#e0f0ff', text: '#333333' },
-    dark: { bg: '#1a3d5c', text: '#99ccff' },
+    dark: { bg: '#285a7a', text: '#a8d4f4' },
   },
   purple: {
     light: { bg: '#e8e0ff', text: '#333333' },
-    dark: { bg: '#3d1a5c', text: '#cc99ff' },
+    dark: { bg: '#5a287a', text: '#d4a8f4' },
   },
   pink: {
     light: { bg: '#ffe0f0', text: '#333333' },
-    dark: { bg: '#5c1a3d', text: '#ff99cc' },
+    dark: { bg: '#7a285a', text: '#f4a8d4' },
   },
 }
 

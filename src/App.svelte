@@ -186,8 +186,8 @@
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid var(--bg-tertiary);
-    border-top-color: var(--accent-color);
+    border: 4px solid var(--border-color);
+    border-top-color: var(--text-secondary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
