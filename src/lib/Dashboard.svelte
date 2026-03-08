@@ -3,6 +3,7 @@
   import { logout } from './authService'
   import { formatDate } from './dateUtils'
   import { toggleTheme, getTheme, subscribeToThemeChanges } from './themeService'
+  import { showConfirm } from './confirmDialogService'
   import type { User } from 'firebase/auth'
   import type { Board } from './types'
   import type { Theme } from './themeService'
@@ -58,7 +59,14 @@
   }
 
   async function handleDeleteBoard(boardId: string, boardTitle: string): Promise<void> {
-    if (confirm(`Delete board "${boardTitle}"?`)) {
+    const confirmed = await showConfirm({
+      title: 'Delete Board',
+      message: `Are you sure you want to delete "${boardTitle}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    })
+    if (confirmed) {
       try {
         await deleteBoard(boardId)
       } catch (err: unknown) {

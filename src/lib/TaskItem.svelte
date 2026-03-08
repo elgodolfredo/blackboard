@@ -22,9 +22,9 @@
     onchange={handleCheckboxChange}
     class="task-checkbox"
   />
-  <span class="task-title" onclick={onClick}>
+  <button class="task-title" onclick={onClick}>
     {task.title}
-  </span>
+  </button>
 </div>
 
 <style>
@@ -44,6 +44,19 @@
   .task-title {
     flex: 1;
     word-break: break-word;
+    font-size: 0.875rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+
+  .task-title:hover {
+    opacity: 0.7;
   }
 
   .task-item.completed .task-title {

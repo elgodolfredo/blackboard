@@ -11,6 +11,8 @@
 
   let draggedGroupId: string | null = $state(null)
   let dragOffset = $state({ x: 0, y: 0 })
+  let contextMenu = $state<{ x: number; y: number } | null>(null)
+  let boardElement: HTMLDivElement | undefined = $state()
 
   function handleGroupMouseDown(groupId: string, e: MouseEvent): void {
     draggedGroupId = groupId
@@ -50,20 +52,39 @@
   function handleContextMenu(e: MouseEvent): void {
     e.preventDefault()
     e.stopPropagation()
-    console.log('Context menu triggered at:', e.clientX, e.clientY)
+    
+    // Get the board container's position to calculate relative coordinates
+    if (boardElement) {
+      const rect = boardElement.getBoundingClientRect()
+      contextMenu = { 
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      }
+    } else {
+      contextMenu = { x: e.clientX, y: e.clientY }
+    }
+  }
+
+  function handleAddGroup(): void {
+    if (!contextMenu) return
 
     const newGroup: TaskGroupType = {
       id: `group-${Date.now()}`,
       title: `Group ${appState.groups.length + 1}`,
       tasks: [],
       position: {
-        x: e.clientX,
-        y: e.clientY,
+        x: contextMenu.x,
+        y: contextMenu.y,
       },
       colorTheme: 'white',
     }
 
     onUpdateState({ groups: [...appState.groups, newGroup] })
+    contextMenu = null
+  }
+
+  function handleCloseContextMenu(): void {
+    contextMenu = null
   }
 
   function handleUpdateGroup(
@@ -84,15 +105,21 @@
 
 <div
   class="task-board"
+  role="main"
+  bind:this={boardElement}
   oncontextmenu={handleContextMenu}
   onmousemove={handleMouseMove}
   onmouseup={handleMouseUp}
   onmouseleave={handleMouseUp}
+  onclick={handleCloseContextMenu}
 >
   {#if appState.groups.length === 0}
     <div class="empty-state">
       Right-click anywhere or use the button below to create a group
-      <button onclick={() => handleContextMenu({ clientX: 100, clientY: 100 } as MouseEvent)}>
+      <button onclick={(e) => {
+        e.stopPropagation()
+        handleAddGroup()
+      }}>
         + Add Group
       </button>
     </div>
@@ -103,16 +130,28 @@
       class="group-wrapper"
       class:dragging={draggedGroupId === group.id}
       style="position: absolute; left: {group.position.x}px; top: {group.position.y}px;"
-      onmousedown={(e) => handleGroupMouseDown(group.id, e)}
     >
       <TaskGroupComponent
         {group}
         onUpdateGroup={(updatedGroup) =>
           handleUpdateGroup(group.id, updatedGroup)}
         onDeleteGroup={() => handleDeleteGroup(group.id)}
+        onHeaderMouseDown={(e) => handleGroupMouseDown(group.id, e)}
       />
     </div>
   {/each}
+
+  {#if contextMenu && boardElement}
+    {@const boardRect = boardElement.getBoundingClientRect()}
+    <div
+      class="context-menu"
+      style="position: fixed; left: {boardRect.left + contextMenu.x}px; top: {boardRect.top + contextMenu.y}px;"
+    >
+      <button class="context-menu-item" onclick={handleAddGroup}>
+        + Add Group
+      </button>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -154,15 +193,34 @@
     background-color: var(--bg-tertiary);
   }
 
-  .group-wrapper {
-    cursor: grab;
-  }
-
   .group-wrapper.dragging {
-    cursor: grabbing;
     z-index: 1000;
   }
 
-  .group-wrapper:hover {
+  .context-menu {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 150px;
+    padding: 4px 0;
+  }
+
+  .context-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: background-color 0.15s;
+  }
+
+  .context-menu-item:hover {
+    background-color: var(--bg-tertiary);
   }
 </style>

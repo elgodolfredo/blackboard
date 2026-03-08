@@ -113,9 +113,9 @@
         </button>
       </div>
     {:else}
-      <h2 class="board-title" onclick={handleEditTitle} title="Click to edit">
+      <button class="board-title" onclick={handleEditTitle} title="Click to edit">
         {boardTitle}
-      </h2>
+      </button>
     {/if}
   </div>
 
@@ -169,18 +169,28 @@
     color: var(--text-primary);
     cursor: pointer;
     user-select: none;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     max-width: 400px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 4px;
+    border: none;
+    background-color: transparent;
+    font-family: inherit;
+    font-weight: inherit;
+    text-align: left;
   }
 
   .board-title:hover {
-    opacity: 0.7;
+    opacity: 0.8;
     background-color: var(--bg-tertiary);
+  }
+
+  .board-title:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
   }
 
   .title-input {

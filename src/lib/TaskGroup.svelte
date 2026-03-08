@@ -5,14 +5,16 @@
   import type { Theme } from './themeService'
   import TaskItem from './TaskItem.svelte'
   import TaskModal from './TaskModal.svelte'
+  import { showConfirm } from './confirmDialogService'
 
   interface Props {
     group: TaskGroupType
     onUpdateGroup: (group: TaskGroupType) => void
     onDeleteGroup: () => void
+    onHeaderMouseDown?: (e: MouseEvent) => void
   }
 
-  let { group, onUpdateGroup, onDeleteGroup }: Props = $props()
+  let { group, onUpdateGroup, onDeleteGroup, onHeaderMouseDown }: Props = $props()
 
   let selectedTask: Task | null = $state(null)
   let isModalOpen: boolean = $state(false)
@@ -114,8 +116,14 @@
     newTaskTitle = ''
   }
 
-  function handleDeleteGroup(): void {
-    if (confirm(`Delete group "${group.title}"?`)) {
+  async function handleDeleteGroup(): Promise<void> {
+    const confirmed = await showConfirm({
+      title: 'Delete Group',
+      message: `Are you sure you want to delete "${group.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    })
+    if (confirmed) {
       onDeleteGroup()
     }
   }
@@ -159,9 +167,16 @@
     isMenuOpen = !isMenuOpen
   }
 
-  function handleDeleteFromMenu(): void {
+  async function handleDeleteFromMenu(): Promise<void> {
     isMenuOpen = false
-    if (confirm(`Delete group "${group.title}"?`)) {
+    const confirmed = await showConfirm({
+      title: 'Delete Group',
+      message: `Are you sure you want to delete "${group.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    })
+    if (confirmed) {
       onDeleteGroup()
     }
   }
@@ -169,8 +184,11 @@
 
 <div
   class="task-group"
+  role="region"
+  aria-label="Task group: {group.title}"
   oncontextmenu={(e) => e.stopPropagation()}
-  style="background-color: {getColors().bg}; color: {getColors().text};"
+  style="background-color: {getColors().bg}; color: {getColors().text}; cursor: drag"
+  onmousedown={onHeaderMouseDown}
 >
   <div class="group-header">
     {#if isEditingTitle}
@@ -186,27 +204,28 @@
           }
         }}
         autofocus
+        onmousedown={(e) => e.stopPropagation()}
       />
       <div class="title-actions">
         <button onclick={handleSaveTitle} class="save-btn" title="Save">
-          ✓
+          <i class="fas fa-check"></i>
         </button>
-        <button onclick={handleCancelTitle} class="cancel-btn" title="Cancel">
-          ✕
+        <button onclick={handleCancelTitle} class="cancel-btn" title="Revert">
+          <i class="fas fa-undo"></i>
         </button>
       </div>
     {:else}
-      <span class="group-title" onclick={handleEditTitle} title="Click to edit">
+      <button class="group-title" onclick={handleEditTitle} title="Click to edit">
         {group.title}
-      </span>
+      </button>
       <div class="menu-container" bind:this={menuContainerRef}>
         <button onclick={handleMenuClick} class="menu-btn" title="Menu">
           ⋯
         </button>
         {#if isMenuOpen}
-          <div class="menu-dropdown" onclick={(e) => e.stopPropagation()}>
+          <div class="menu-dropdown" role="menu" tabindex="0" onclick={(e) => e.stopPropagation()}>
              {#if isColorPickerOpen}
-                <div class="color-picker">
+                <div class="color-picker" role="group" aria-label="Color options">
                   {#each colorThemeOptions as colorTheme (colorTheme)}
                     {@const colors = getColorForTheme(colorTheme, currentTheme)}
                     <button
@@ -252,6 +271,7 @@
           handleAddTask()
         }
       }}
+      onmousedown={(e) => e.stopPropagation()}
     />
   </div>
 </div>
@@ -273,6 +293,7 @@
     padding: 1rem;
     min-width: 250px;
     background: white;
+    cursor: grab;
   }
 
   .group-header {
@@ -280,6 +301,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    user-select: none;
+  }
+
+  .task-group:active {
+    cursor: grabbing;
   }
 
   .group-title {
@@ -289,11 +315,23 @@
     cursor: pointer;
     user-select: none;
     color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    text-align: left;
+    transition: all 0.15s;
   }
 
   .group-title:hover {
     opacity: 0.8;
     text-decoration: underline;
+  }
+
+  .group-title:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   .menu-container {

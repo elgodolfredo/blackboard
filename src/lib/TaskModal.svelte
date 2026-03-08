@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Task } from './types'
+  import { showConfirm } from './confirmDialogService'
 
   interface Props {
     task: Task
@@ -35,8 +36,15 @@
     isEditing = false
   }
 
-  function handleDeleteClick(): void {
-    if (confirm('Delete this task?')) {
+  async function handleDeleteClick(): Promise<void> {
+    const confirmed = await showConfirm({
+      title: 'Delete Task',
+      message: `Are you sure you want to delete "${task.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    })
+    if (confirmed) {
       onDelete()
       onClose()
     }
@@ -51,8 +59,8 @@
 </script>
 
 {#if isOpen}
-  <div class="modal-overlay" onclick={onClose}>
-    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
+  <div class="modal-overlay" role="presentation" onclick={onClose}>
+    <div class="modal-content" role="dialog" aria-modal="true" tabindex="0" onclick={(e) => e.stopPropagation()}>
       {#if isEditing}
         <div class="modal-header">
           <h2>Edit Task</h2>

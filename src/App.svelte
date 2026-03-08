@@ -6,6 +6,7 @@
   import Login from './lib/Login.svelte'
   import Dashboard from './lib/Dashboard.svelte'
   import AppMenu from './lib/AppMenu.svelte'
+  import ConfirmDialogContainer from './lib/ConfirmDialogContainer.svelte'
   import { subscribeToAuthState, logout } from './lib/authService'
   import { subscribeToBoardUpdates, updateBoardState } from './lib/firestoreService'
   import { initRouter, subscribeToRouteChanges, navigateTo, updateAuthState } from './lib/router'
@@ -16,6 +17,7 @@
   let currentBoard: any = $state(null)
   let unsubscribeBoard: (() => void) | null = $state(null)
   let routerInitialized = false
+  let authLoading: boolean = $state(true)
 
   // Subscribe to route changes
   $effect(() => {
@@ -66,6 +68,9 @@
           unsubscribeBoard = null
         }
       }
+
+      // Auth state has been determined
+      authLoading = false
     })
 
     return () => unsubscribe()
@@ -105,7 +110,16 @@
   }
 </script>
 
-{#if routeState.page === 'login'}
+<ConfirmDialogContainer />
+
+{#if authLoading}
+  <div class="loading-screen">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+{:else if routeState.page === 'login'}
   <Login onLoginSuccess={handleLoginSuccess} />
 {:else if routeState.page === 'dashboard' && currentUser}
   <Dashboard
@@ -152,5 +166,41 @@
     background-color: var(--bg-secondary);
     border-bottom: 3px solid var(--border-color);
     z-index: 10;
+  }
+
+  .loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+  }
+
+  .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-tertiary);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loading-content p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
   }
 </style>

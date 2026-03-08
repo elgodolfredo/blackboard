@@ -23,6 +23,7 @@
     "@fortawesome/fontawesome-free": "^7.2.0",
     "firebase": "^12.10.0",
     "page": "^1.11.6",
-    "svelte-dnd-action": "^0.9.69"
+    "svelte-dnd-action": "^0.9.69",
+    "svelte-modals": "^2.0.1"
   }
 }
