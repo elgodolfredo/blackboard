@@ -116,18 +116,6 @@
     newTaskTitle = ''
   }
 
-  async function handleDeleteGroup(): Promise<void> {
-    const confirmed = await showConfirm({
-      title: 'Delete Group',
-      message: `Are you sure you want to delete "${group.title}"? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-    })
-    if (confirmed) {
-      onDeleteGroup()
-    }
-  }
-
   function handleEditTitle(): void {
     isEditingTitle = true
     editedTitle = group.title
@@ -448,25 +436,6 @@
   .save-btn:hover,
   .cancel-btn:hover {
     background-color: var(--bg-tertiary);
-  }
-
-  .delete-group-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-  }
-
-  .delete-group-btn:hover {
-    color: var(--error-text);
   }
 
   .task-list {
