@@ -1,93 +1,76 @@
 # Agent Guidelines for Blackboard
 
-A Svelte + TypeScript + Vite project. This document provides essential information for agentic coding tools working in this repository.
+A collaborative task board app using Svelte 5 + TypeScript + Vite + Firebase.
 
-## Build, Lint & Test Commands
+## Commands
 
 ```bash
-# Development
-npm run dev              # Start dev server at http://localhost:5173
-
-# Type checking & validation
-npm run check           # Run svelte-check + TypeScript type checking
-                        # Checks both src/** and tsconfig.node.json
-
-# Build
-npm run build           # Compile for production (dist/)
-
-# Preview
-npm run preview         # Preview production build locally
+npm run dev              # Dev server at http://localhost:5173
+npm run check           # Type check (svelte-check + tsc)
+npm run build           # Production build → dist/
+npm run preview         # Preview production build
 ```
 
-**Note:** There are no unit tests configured. Use `npm run check` for validation.
+**No unit tests configured.** Use `npm run check` for validation.
 
-## Code Style Guidelines
+## Firebase Setup
 
-### TypeScript Configuration
-- **Target:** ES2022
-- **Module:** ESNext
-- **Strict mode:** Enabled (`checkJs: true`, `allowJs: true`)
-- **Svelte types:** Automatically included via `@tsconfig/svelte`
-- All `.ts`, `.js`, and `.svelte` files are type-checked
+**Required:** Copy `.env.example` to `.env.local` and fill in Firebase credentials. The app will not run without valid Firebase config.
 
-### Imports
-- Use ES6 imports: `import { ... } from 'module'`
-- Absolute imports work via Svelte/Vite (e.g., `import Counter from './lib/Counter.svelte'`)
-- Import styles after scripts in Svelte files
-- Group imports: external packages first, then local modules
-
-### File Organization
-- Components: `src/lib/*.svelte`
-- Entry point: `src/main.ts`
-- Styles: Scoped `<style>` blocks in Svelte components or `src/app.css`
-- Assets: `src/assets/` or public files in `public/`
-
-### Svelte 5 Specifics
-- Use `$state` for reactive state: `let count: number = $state(0)`
-- Use `<script lang="ts">` for TypeScript in components
-- Scoped styles are default (CSS within `<style>` blocks)
-- Event handlers: `onclick={handler}`, `onchange={handler}`, etc.
-
-### Formatting & Naming
-- Indentation: 2 spaces (Vite/Svelte default)
-- Use camelCase for variables and functions
-- Use PascalCase for component files (e.g., `Counter.svelte`)
-- Use kebab-case for CSS classes when needed
-- Semicolons: Optional but be consistent with codebase style
-
-### Type Annotations
-- Always type function parameters and return types
-- Use explicit types over `any`
-- Svelte components have implicit return types
-- Type state variables: `let count: number = $state(0)`
-
-### Error Handling
-- Use try-catch for async operations
-- Log errors to console in development
-- Provide user-friendly error messages in UI
-- Type error boundaries: `catch (error: unknown) { ... }`
-
-### Component Best Practices
-- Keep components small and focused
-- Props should be typed explicitly
-- Use `export let` for component props
-- Reactive updates: Svelte handles this automatically with `$state`
-- Store state externally if needed for multiple components (using Svelte stores)
-
-## Project Structure
-```
-src/
-  ├── App.svelte         # Root component
-  ├── main.ts            # Entry point
-  ├── app.css            # Global styles
-  ├── lib/               # Reusable components
-  │   └── Counter.svelte
-  └── assets/            # Static assets
+```bash
+# .env.local must contain:
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
 
-## Important Notes
-- Project uses **Svelte 5** with runes (`$state`, `$derived`, etc.)
-- TypeScript version: ~5.9.3
-- No build configuration beyond Vite defaults
-- HMR is enabled for development but state preservation is disabled
-- CSS is scoped to components by default
+**Firebase Emulator:** Configured in `firebase.json` with Firestore on port 8080. Firestore offline persistence is enabled by default (see `src/lib/firebase.ts`).
+
+**Firestore Rules:** Defined in `firestore.rules`. Boards support owner/collaborator access control. No hard deletes allowed (use `archived` flag).
+
+## Architecture
+
+- **Routing:** Uses `page` library (NOT SvelteKit). Routes defined in `src/lib/router.ts`:
+  - `/` → Login (redirects to `/dashboard` if authenticated)
+  - `/dashboard` → User's boards list
+  - `/board/:id` → Individual task board
+  
+- **Real-time Sync:** Board state syncs via Firestore subscriptions (`subscribeToBoardUpdates` in `firestoreService.ts`). Subscriptions auto-cleanup on route change.
+
+- **Entry Point:** `src/main.ts` → `App.svelte` (root component with routing logic)
+
+## Svelte 5 Specifics
+
+- **State:** `let count = $state(0)`
+- **Computed:** `let doubled = $derived(count * 2)`
+- **Effects:** `$effect(() => { ... })`
+- **Props:** `let { name, age = 18 } = $props<{ name: string; age?: number }>()`
+  - ⚠️ Do NOT use `export let` (Svelte 3/4 pattern)
+- **Two-way binding:** `let { value = $bindable() } = $props()`
+
+## Key Dependencies
+
+- `firebase` - Auth + Firestore backend
+- `page` - Client-side routing (not SvelteKit)
+- `svelte-dnd-action` - Drag-and-drop for task items
+- `svelte-modals` - Modal dialogs
+- `@fortawesome/fontawesome-free` - Icons
+
+## Type Checking
+
+TypeScript strict mode enabled. All `.ts`, `.js`, and `.svelte` files are type-checked.
+
+Config split:
+- `tsconfig.app.json` - App source (`src/**`)
+- `tsconfig.node.json` - Vite config
+- `tsconfig.json` - Root (references both)
+
+## Conventions
+
+- **Components:** PascalCase files (e.g., `TaskBoard.svelte`)
+- **Services:** camelCase files (e.g., `authService.ts`)
+- **Indentation:** 2 spaces
+- **Imports:** External packages first, then local modules

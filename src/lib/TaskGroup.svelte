@@ -6,6 +6,9 @@
   import TaskItem from './TaskItem.svelte'
   import TaskModal from './TaskModal.svelte'
   import { showConfirm } from './confirmDialogService'
+  import { dragHandleZone } from 'svelte-dnd-action'
+  import { flip } from 'svelte/animate'
+  import type { DndEvent } from 'svelte-dnd-action'
 
   interface Props {
     group: TaskGroupType
@@ -168,6 +171,24 @@
       onDeleteGroup()
     }
   }
+
+  function handleDndConsider(e: CustomEvent<DndEvent<Task>>): void {
+    const updatedGroup: TaskGroupType = {
+      ...group,
+      tasks: e.detail.items,
+    }
+    // Actualización temporal durante drag (solo visual)
+    onUpdateGroup(updatedGroup)
+  }
+
+  function handleDndFinalize(e: CustomEvent<DndEvent<Task>>): void {
+    const updatedGroup: TaskGroupType = {
+      ...group,
+      tasks: e.detail.items,
+    }
+    // Actualización final al soltar (se persiste a Firestore)
+    onUpdateGroup(updatedGroup)
+  }
 </script>
 
 <div
@@ -238,14 +259,24 @@
     {/if}
   </div>
 
-  <div class="task-list">
+  <div 
+    class="task-list"
+    use:dragHandleZone={{
+      items: group.tasks,
+      flipDurationMs: 300
+    }}
+    onconsider={handleDndConsider}
+    onfinalize={handleDndFinalize}
+  >
     {#each group.tasks as task (task.id)}
-      <TaskItem
-        {task}
-        onToggleComplete={(completed) =>
-          handleToggleComplete(task.id, completed)}
-        onClick={() => handleSelectTask(task)}
-      />
+      <div animate:flip={{duration: 300}}>
+        <TaskItem
+          {task}
+          onToggleComplete={(completed) =>
+            handleToggleComplete(task.id, completed)}
+          onClick={() => handleSelectTask(task)}
+        />
+      </div>
     {/each}
   </div>
 
@@ -460,5 +491,16 @@
     border-radius: 4px;
     background-color: var(--bg-secondary);
     color: var(--text-primary);
+  }
+
+  /* Drag and drop styles */
+  .task-list :global(.dragged) {
+    opacity: 0.5;
+  }
+
+  .task-list :global(.drop-target-zone) {
+    outline: 1px dashed var(--accent-color);
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 </style>

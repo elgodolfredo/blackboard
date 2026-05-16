@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Task } from './types'
+  import { dragHandle } from 'svelte-dnd-action'
 
   interface Props {
     task: Task
@@ -16,6 +17,14 @@
 </script>
 
 <div class="task-item" class:completed={task.completed}>
+  <span 
+    use:dragHandle 
+    aria-label="Drag to reorder {task.title}" 
+    class="drag-handle" 
+    title="Drag to reorder"
+  >
+    ⋮⋮
+  </span>
   <input
     type="checkbox"
     checked={task.completed}
@@ -62,5 +71,24 @@
   .task-item.completed .task-title {
     text-decoration: line-through;
     color: var(--text-secondary);
+  }
+
+  .drag-handle {
+    cursor: grab;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    user-select: none;
+    flex-shrink: 0;
+    /* padding: 0 0.25rem; */
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+
+  .drag-handle:hover {
+    opacity: 1;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
   }
 </style>
