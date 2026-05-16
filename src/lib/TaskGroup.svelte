@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Task, TaskGroup as TaskGroupType, ColorTheme } from './types'
-  import { colorThemes, getColorForTheme } from './colorThemeService'
+  import { getColorForTheme } from './colorThemeService'
   import { getTheme, subscribeToThemeChanges } from './themeService'
   import type { Theme } from './themeService'
   import TaskItem from './TaskItem.svelte'
@@ -12,12 +12,13 @@
 
   interface Props {
     group: TaskGroupType
+    isBeingDragged: boolean
     onUpdateGroup: (group: TaskGroupType) => void
     onDeleteGroup: () => void
     onHeaderMouseDown?: (e: MouseEvent) => void
   }
 
-  let { group, onUpdateGroup, onDeleteGroup, onHeaderMouseDown }: Props = $props()
+  let { group, isBeingDragged, onUpdateGroup, onDeleteGroup, onHeaderMouseDown }: Props = $props()
 
   let selectedTask: Task | null = $state(null)
   let isModalOpen: boolean = $state(false)
@@ -27,6 +28,7 @@
   let isMenuOpen: boolean = $state(false)
   let isColorPickerOpen: boolean = $state(false)
   let currentTheme: Theme = $state(getTheme())
+  let animationDuration = $state(300);
   let menuContainerRef: HTMLDivElement | undefined = $state()
 
   // Subscribe to theme changes to re-render colors
@@ -56,6 +58,10 @@
   // Get current colors based on theme
   $effect(() => {
     // This effect reruns when theme changes
+  })
+
+  $effect(() => {
+    animationDuration = isBeingDragged ? 0 : 300
   })
 
   function getColors() {
@@ -196,10 +202,9 @@
   role="region"
   aria-label="Task group: {group.title}"
   oncontextmenu={(e) => e.stopPropagation()}
-  style="background-color: {getColors().bg}; color: {getColors().text}; cursor: drag"
-  onmousedown={onHeaderMouseDown}
+  style="background-color: {getColors().bg}; color: {getColors().text};"
 >
-  <div class="group-header">
+  <div class="group-header" onmousedown={onHeaderMouseDown}>
     {#if isEditingTitle}
       <input
         type="text"
@@ -263,13 +268,13 @@
     class="task-list"
     use:dragHandleZone={{
       items: group.tasks,
-      flipDurationMs: 300
+      flipDurationMs: animationDuration
     }}
     onconsider={handleDndConsider}
     onfinalize={handleDndFinalize}
   >
     {#each group.tasks as task (task.id)}
-      <div animate:flip={{duration: 300}}>
+      <div animate:flip={{duration: animationDuration}}>
         <TaskItem
           {task}
           onToggleComplete={(completed) =>
@@ -312,7 +317,6 @@
     padding: 1rem;
     min-width: 250px;
     background: white;
-    cursor: grab;
   }
 
   .group-header {
@@ -321,9 +325,10 @@
     align-items: center;
     margin-bottom: 1rem;
     user-select: none;
+    cursor: grab;
   }
 
-  .task-group:active {
+  .group-header:active {
     cursor: grabbing;
   }
 

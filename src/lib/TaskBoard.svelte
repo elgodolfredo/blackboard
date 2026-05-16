@@ -127,6 +127,7 @@
     >
       <TaskGroupComponent
         {group}
+        isBeingDragged={draggedGroupId === group.id}
         onUpdateGroup={(updatedGroup) =>
           handleUpdateGroup(group.id, updatedGroup)}
         onDeleteGroup={() => handleDeleteGroup(group.id)}
