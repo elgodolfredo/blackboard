@@ -2,42 +2,42 @@ import type { ColorTheme } from './types'
 import type { Theme } from './themeService'
 
 export interface ColorConfig {
-  light: { bg: string; text: string }
-  dark: { bg: string; text: string }
+  light: { bg: string; text: string; border: string }
+  dark: { bg: string; text: string; border: string }
 }
 
 export const colorThemes: Record<ColorTheme, ColorConfig> = {
   white: {
-    light: { bg: '#ffffff', text: '#333333' },
-    dark: { bg: '#4a4a4a', text: '#e8e8e8' },
+    light: { bg: '#ffffff', text: '#333333', border: '#d9d9d9' },
+    dark: { bg: '#434343', text: '#dcdcdc', border: '#8f8f8f' },
   },
   red: {
-    light: { bg: '#ffe0e0', text: '#333333' },
-    dark: { bg: '#7a3535', text: '#f4b8b8' },
+    light: { bg: '#ffe0e0', text: '#333333', border: '#e8b9b9' },
+    dark: { bg: '#673737', text: '#e3b6b6', border: '#b28686' },
   },
   orange: {
-    light: { bg: '#ffe8cc', text: '#333333' },
-    dark: { bg: '#b7410a', text: '#ffb366' },
+    light: { bg: '#ffe8cc', text: '#333333', border: '#e9c9a5' },
+    dark: { bg: '#724328', text: '#e0b08c', border: '#ac856b' },
   },
   yellow: {
-    light: { bg: '#fffacc', text: '#333333' },
-    dark: { bg: '#7a7828', text: '#f4f49e' },
+    light: { bg: '#fffacc', text: '#333333', border: '#e9e2a8' },
+    dark: { bg: '#66642c', text: '#dddd9b', border: '#aca666' },
   },
   green: {
-    light: { bg: '#e0f0e0', text: '#333333' },
-    dark: { bg: '#2a7a2a', text: '#a8f4a8' },
+    light: { bg: '#e0f0e0', text: '#333333', border: '#bcd6bc' },
+    dark: { bg: '#2f6532', text: '#b2deae', border: '#81a17f' },
   },
   blue: {
-    light: { bg: '#e0f0ff', text: '#333333' },
-    dark: { bg: '#285a7a', text: '#a8d4f4' },
+    light: { bg: '#e0f0ff', text: '#333333', border: '#b9d1e6' },
+    dark: { bg: '#31576d', text: '#b0cfe1', border: '#809eaf' },
   },
   purple: {
-    light: { bg: '#e8e0ff', text: '#333333' },
-    dark: { bg: '#5a287a', text: '#d4a8f4' },
+    light: { bg: '#e8e0ff', text: '#333333', border: '#cec1e9' },
+    dark: { bg: '#553d6a', text: '#ccb5df', border: '#9a89ad' },
   },
   pink: {
-    light: { bg: '#ffe0f0', text: '#333333' },
-    dark: { bg: '#7a285a', text: '#f4a8d4' },
+    light: { bg: '#ffe0f0', text: '#333333', border: '#e8bfd5' },
+    dark: { bg: '#684055', text: '#dfb6cb', border: '#a9879a' },
   },
 }
 

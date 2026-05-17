@@ -199,10 +199,11 @@
 
 <div
   class="task-group"
+  class:dark-cute={currentTheme === 'dark'}
   role="region"
   aria-label="Task group: {group.title}"
   oncontextmenu={(e) => e.stopPropagation()}
-  style="background-color: {getColors().bg}; color: {getColors().text};"
+  style="background-color: {getColors().bg}; color: {getColors().text}; border-color: {currentTheme === 'dark' ? getColors().border : 'var(--border-color)'}; box-shadow: {currentTheme === 'dark' ? '0 6px 18px rgba(0, 0, 0, 0.2)' : 'none'};"
 >
   <div class="group-header" onmousedown={onHeaderMouseDown}>
     {#if isEditingTitle}
@@ -245,7 +246,7 @@
                     <button
                       onclick={() => handleChangeColor(colorTheme)}
                       class="color-square"
-                      style="background-color: {colors.bg}; border-color: {colors.text};"
+                      style="background-color: {colors.bg}; border-color: {currentTheme === 'dark' ? colors.border : colors.text};"
                       title="Choose color"
                     />
                   {/each}
@@ -317,6 +318,12 @@
     padding: 1rem;
     min-width: 250px;
     background: white;
+    transition: border-color 0.2s, box-shadow 0.2s, border-radius 0.2s;
+  }
+
+  .task-group.dark-cute {
+    border-width: 2px;
+    border-radius: 14px;
   }
 
   .group-header {
