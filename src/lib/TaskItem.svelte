@@ -23,7 +23,7 @@
     class="drag-handle" 
     title="Drag to reorder"
   >
-    ⋮⋮
+    <i class="fas fa-grip-vertical"></i>
   </span>
   <input
     type="checkbox"
@@ -76,7 +76,6 @@
   .drag-handle {
     cursor: grab;
     color: var(--text-secondary);
-    font-size: 1.2rem;
     user-select: none;
     flex-shrink: 0;
     /* padding: 0 0.25rem; */
