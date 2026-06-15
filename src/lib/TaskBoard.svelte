@@ -1,18 +1,20 @@
 <script lang="ts">
-  import type { TaskGroup as TaskGroupType, AppState } from './types'
+  import type { TaskGroup as TaskGroupType, AppState, TaskGroup } from './types'
   import TaskGroupComponent from './TaskGroup.svelte'
 
   interface Props {
     appState: AppState
     onUpdateState: (state: AppState) => void
+    onUpdateGroupPosition: (group: TaskGroup) => void;
   }
 
-  let { appState, onUpdateState }: Props = $props()
+  let { appState, onUpdateState, onUpdateGroupPosition }: Props = $props()
 
   let draggedGroupId: string | null = $state(null)
   let dragOffset = $state({ x: 0, y: 0 })
   let contextMenu = $state<{ x: number; y: number } | null>(null)
   let boardElement: HTMLDivElement | undefined = $state()
+  let modifiedPositionGroup = $state({x: 0, y: 0});
 
   function handleGroupMouseDown(groupId: string, e: MouseEvent): void {
     draggedGroupId = groupId
@@ -28,24 +30,30 @@
   function handleMouseMove(e: MouseEvent): void {
     if (!draggedGroupId) return
 
-    const updatedGroups = appState.groups.map((g) => {
-      if (g.id === draggedGroupId) {
-        return {
-          ...g,
-          position: {
-            x: e.clientX - dragOffset.x,
-            y: e.clientY - dragOffset.y,
-          },
-        }
-      }
-      return g
-    })
-    onUpdateState({ groups: updatedGroups })
-  }
+    modifiedPositionGroup = {
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y,
+    }
 
+    const foundGroup = appState.groups.find((g) => { return draggedGroupId === g.id })
+    if (!foundGroup) return
+    onUpdateGroupPosition({ ...foundGroup, position: modifiedPositionGroup })
+  }
+  
   function handleMouseUp(): void {
     if (draggedGroupId) {
+      const updatedGroups = appState.groups.map((g) => {
+        if ( draggedGroupId === g.id){
+          return {
+            ...g,
+            position: modifiedPositionGroup,
+          }
+        }
+        return g;
+      })
+      onUpdateState({ groups: updatedGroups })
       draggedGroupId = null
+      modifiedPositionGroup = {x: 0, y: 0}
     }
   }
 

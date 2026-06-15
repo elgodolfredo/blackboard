@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AppState } from './lib/types'
+  import type { AppState, TaskGroup } from './lib/types'
   import type { User } from 'firebase/auth'
   import type { RouteState } from './lib/router'
   import TaskBoard from './lib/TaskBoard.svelte'
@@ -91,6 +91,16 @@
     }
   }
 
+  function handleUpdatePosition(groupUpdated: TaskGroup) {
+    const updatedGroups = boardState.groups.map((g) => {
+      if ( groupUpdated.id === g.id){
+        return groupUpdated
+      }
+      return g;
+    })
+    boardState.groups = updatedGroups;
+  }
+
   function handleBackToDashboard(): void {
     navigateTo('dashboard')
   }
@@ -137,7 +147,7 @@
          onLogout={handleLogout} 
        />
      </div>
-     <TaskBoard appState={boardState} onUpdateState={handleUpdateBoardState} />
+     <TaskBoard appState={boardState} onUpdateState={handleUpdateBoardState} onUpdateGroupPosition={handleUpdatePosition} />
    </div>
 {/if}
 

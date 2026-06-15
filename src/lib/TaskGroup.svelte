@@ -483,7 +483,6 @@
 
   .task-list {
     margin-bottom: 1rem;
-    max-height: 300px;
     overflow-y: auto;
   }
 
