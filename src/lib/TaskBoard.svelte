@@ -14,10 +14,12 @@
   let dragOffset = $state({ x: 0, y: 0 })
   let contextMenu = $state<{ x: number; y: number } | null>(null)
   let boardElement: HTMLDivElement | undefined = $state()
-  let modifiedPositionGroup = $state({x: 0, y: 0});
+  let modifiedPositionGroup = $state({x: 0, y: 0})
+  let hasDragged = $state(false)
 
   function handleGroupMouseDown(groupId: string, e: MouseEvent): void {
     draggedGroupId = groupId
+    hasDragged = false
     const group = appState.groups.find((g) => g.id === groupId)
     if (group) {
       dragOffset = {
@@ -30,6 +32,7 @@
   function handleMouseMove(e: MouseEvent): void {
     if (!draggedGroupId) return
 
+    hasDragged = true
     modifiedPositionGroup = {
       x: e.clientX - dragOffset.x,
       y: e.clientY - dragOffset.y,
@@ -42,17 +45,20 @@
   
   function handleMouseUp(): void {
     if (draggedGroupId) {
-      const updatedGroups = appState.groups.map((g) => {
-        if ( draggedGroupId === g.id){
-          return {
-            ...g,
-            position: modifiedPositionGroup,
+      if (hasDragged) {
+        const updatedGroups = appState.groups.map((g) => {
+          if (draggedGroupId === g.id) {
+            return {
+              ...g,
+              position: modifiedPositionGroup,
+            }
           }
-        }
-        return g;
-      })
-      onUpdateState({ groups: updatedGroups })
+          return g;
+        })
+        onUpdateState({ groups: updatedGroups })
+      }
       draggedGroupId = null
+      hasDragged = false
       modifiedPositionGroup = {x: 0, y: 0}
     }
   }

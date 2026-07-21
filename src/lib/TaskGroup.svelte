@@ -234,11 +234,11 @@
         {group.title}
       </button>
       <div class="menu-container" bind:this={menuContainerRef}>
-        <button onclick={handleMenuClick} class="menu-btn" title="Menu">
+        <button onclick={handleMenuClick} onmousedown={(e) => e.stopPropagation()} class="menu-btn" title="Menu">
           ⋯
         </button>
         {#if isMenuOpen}
-          <div class="menu-dropdown" role="menu" tabindex="0" onclick={(e) => e.stopPropagation()}>
+          <div class="menu-dropdown" role="menu" tabindex="0" onclick={(e) => e.stopPropagation()} onmousedown={(e) => e.stopPropagation()}>
              {#if isColorPickerOpen}
                 <div class="color-picker" role="group" aria-label="Color options">
                   {#each colorThemeOptions as colorTheme (colorTheme)}
