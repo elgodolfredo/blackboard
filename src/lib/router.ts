@@ -1,4 +1,4 @@
-import page, { type Context } from 'page'
+import navaid from 'navaid'
 
 export type PageName = 'login' | 'dashboard' | 'board'
 
@@ -10,6 +10,8 @@ export interface RouteState {
 let currentState: RouteState = { page: 'login' }
 let stateCallbacks: ((state: RouteState) => void)[] = []
 let isAuthenticated = false
+
+const router = navaid()
 
 export function subscribeToRouteChanges(callback: (state: RouteState) => void): () => void {
   stateCallbacks.push(callback)
@@ -31,46 +33,42 @@ export function getRouteState(): RouteState {
 
 export function navigateTo(pageName: PageName, boardId?: string): void {
   if (pageName === 'board' && boardId) {
-    page(`/board/${boardId}`)
+    router.route(`/board/${boardId}`)
   } else if (pageName === 'dashboard') {
-    page('/dashboard')
+    router.route('/dashboard')
   } else if (pageName === 'login') {
-    page('/')
+    router.route('/')
   }
 }
 
 export function initRouter(initialAuthState: boolean): void {
   isAuthenticated = initialAuthState
 
-  page('/', (ctx: Context) => {
-    if (isAuthenticated) {
-      page('/dashboard')
-    } else {
-      notifyStateChange({ page: 'login' })
-    }
-  })
-
-  page('/dashboard', (ctx: Context) => {
-    if (!isAuthenticated) {
-      page('/')
-    } else {
-      notifyStateChange({ page: 'dashboard' })
-    }
-  })
-
-  page('/board/:boardId', (ctx: Context) => {
-    if (!isAuthenticated) {
-      page('/')
-    } else {
-      notifyStateChange({
-        page: 'board',
-        boardId: ctx.params.boardId as string,
-      })
-    }
-  })
+  router
+    .on('/', () => {
+      if (isAuthenticated) {
+        router.route('/dashboard', true)
+      } else {
+        notifyStateChange({ page: 'login' })
+      }
+    })
+    .on('/dashboard', () => {
+      if (!isAuthenticated) {
+        router.route('/', true)
+      } else {
+        notifyStateChange({ page: 'dashboard' })
+      }
+    })
+    .on('/board/:boardId', (params?: { boardId: string }) => {
+      if (!isAuthenticated) {
+        router.route('/', true)
+      } else {
+        notifyStateChange({ page: 'board', boardId: params?.boardId })
+      }
+    })
 
   // Start router
-  page.start()
+  router.listen()
 }
 
 export function updateAuthState(newAuthState: boolean): void {
@@ -79,16 +77,16 @@ export function updateAuthState(newAuthState: boolean): void {
 
   // Update router based on new auth state
   if (!isAuthenticated) {
-    page('/')
+    router.route('/')
   } else {
     // If on login page, redirect to dashboard
     const currentRoute = window.location.pathname
     if (currentRoute === '/') {
-      page('/dashboard')
+      router.route('/dashboard')
     }
   }
 }
 
 export function stopRouter(): void {
-  page.stop()
+  router.unlisten?.()
 }
